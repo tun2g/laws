@@ -1,0 +1,150 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: laws-nginx
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_started
+      admin:
+        condition: service_started
+      api:
+        condition: service_started
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+    networks:
+      - laws
+
+  web:
+    build:
+      context: ..
+      dockerfile: devops/docker/Dockerfile
+      target: web-runner
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        API_BASE_URL: ${WEB_INTERNAL_API_BASE_URL}
+        AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-laws_session}
+        NEXT_PUBLIC_BRAND_NAME: ${WEB_BRAND_NAME:-Laws}
+    container_name: laws-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      API_BASE_URL: ${WEB_INTERNAL_API_BASE_URL}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-laws_session}
+      NEXT_PUBLIC_BRAND_NAME: ${WEB_BRAND_NAME:-Laws}
+    expose:
+      - "4001"
+    networks:
+      - laws
+
+  admin:
+    build:
+      context: ..
+      dockerfile: devops/docker/Dockerfile
+      target: admin-runner
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_BRAND_NAME: ${ADMIN_BRAND_NAME:-Laws Admin}
+    container_name: laws-admin
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - laws
+
+  api:
+    build:
+      context: ..
+      dockerfile: devops/docker/Dockerfile
+      target: api-runner
+    container_name: laws-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      APP_PORT: 4000
+      LOG_LVL: ${LOG_LVL:-info}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+      WEB_ORIGIN: ${WEB_ORIGIN}
+      ADMIN_ORIGIN: ${ADMIN_ORIGIN}
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-laws}
+      DATABASE_USERNAME: ${POSTGRES_USER:-laws}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-100}
+      DATABASE_SSL_ENABLED: ${DATABASE_SSL_ENABLED:-false}
+      DATABASE_REJECT_UNAUTHORIZED: ${DATABASE_REJECT_UNAUTHORIZED:-false}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      USER_KEY_ENC_SECRET: ${USER_KEY_ENC_SECRET}
+      OPENAI_DEFAULT_MODEL: ${OPENAI_DEFAULT_MODEL:-gpt-4.1}
+      OPENAI_FALLBACK_API_KEY: ${OPENAI_FALLBACK_API_KEY:-}
+      CODEX_BINARY: ${CODEX_BINARY:-codex}
+      CODEX_HOME_ROOT: ${CODEX_HOME_ROOT:-/var/lib/laws/codex/users}
+      CODEX_WORKSPACE_ROOT: ${CODEX_WORKSPACE_ROOT:-/var/lib/laws/codex/workspaces}
+      CODEX_MAX_CONCURRENT: ${CODEX_MAX_CONCURRENT:-5}
+      CODEX_MAX_CONCURRENT_PER_USER: ${CODEX_MAX_CONCURRENT_PER_USER:-1}
+      CODEX_LOGIN_TIMEOUT_MS: ${CODEX_LOGIN_TIMEOUT_MS:-300000}
+      CODEX_RUN_TIMEOUT_MS: ${CODEX_RUN_TIMEOUT_MS:-600000}
+      CODEX_SANDBOX: ${CODEX_SANDBOX:-workspace-write}
+    command: >
+      sh -c "pnpm --filter @laws/api migration:run:prod &&
+      pnpm --filter @laws/api start:prod"
+    expose:
+      - "4000"
+    volumes:
+      - laws_codex_data:/var/lib/laws/codex
+    networks:
+      - laws
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: laws-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-laws}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-laws}
+    volumes:
+      - laws_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laws} -d ${POSTGRES_DB:-laws}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - laws
+
+  redis:
+    image: redis:7-alpine
+    container_name: laws-redis
+    restart: unless-stopped
+    volumes:
+      - laws_redis_data:/data
+    networks:
+      - laws
+
+networks:
+  laws:
+    driver: bridge
+
+volumes:
+  laws_postgres_data:
+  laws_redis_data:
+  laws_codex_data:

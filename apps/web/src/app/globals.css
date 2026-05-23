@@ -1,0 +1,256 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+/* =================================================================
+ * Editorial Counsel — design system for Vietnamese legal counsel.
+ *
+ * A warm-paper workspace that pairs scholarly typography (Fraunces
+ * display + Inter Tight body) with restrained colour: deep ink on
+ * parchment, indigo for action, lacquer red reserved for emphasis.
+ *
+ * Tokens are intentionally narrow. Reach for `--ink-*` for text,
+ * `--paper-*` for surfaces, `--accent-*` for primary action,
+ * `--lacquer-*` for emphasis. Hairline rules over thick borders.
+ * ============================================================== */
+@theme {
+  --font-sans:
+    var(--font-inter-tight), 'Inter Tight', ui-sans-serif, system-ui,
+    -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif:
+    var(--font-fraunces), 'Fraunces', 'Source Serif 4', Georgia,
+    ui-serif, serif;
+  --font-mono:
+    var(--font-jetbrains), 'JetBrains Mono', ui-monospace,
+    SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* Paper — the warm off-white surface system. Used for backgrounds,
+     cards, and elevated surfaces. */
+  --color-paper-0: #fffdf8;    /* almost-white, top surfaces */
+  --color-paper-50: #f8f4ea;   /* default body background */
+  --color-paper-100: #f1e9d7;  /* nested cards, hover states */
+  --color-paper-200: #ddcfaf;  /* hairline dividers, soft chips */
+  --color-paper-300: #bcae8b;  /* heavier separators */
+
+  /* Ink — warm desaturated near-blacks for text and structural rules.
+     Keep #0E0C08 reserved for headings + critical UI. */
+  --color-ink-50: #f3eee2;
+  --color-ink-100: #e0d8c4;
+  --color-ink-200: #c4b8a0;
+  --color-ink-300: #978c75;
+  --color-ink-400: #6c6453;
+  --color-ink-500: #46402F;
+  --color-ink-600: #2D2920;
+  --color-ink-700: #1c1a14;
+  --color-ink-800: #14120E;
+  --color-ink-900: #0e0c08;
+
+  /* Backwards-compatible aliases for existing components. */
+  --color-bg: var(--color-paper-50);
+
+  /* Accent — Indigo Ink. Reserved for primary action, focus rings,
+     and key navigation states. */
+  --color-accent-50: #e9eef2;
+  --color-accent-100: #c9d5dd;
+  --color-accent-200: #97aebc;
+  --color-accent-300: #5c7e90;
+  --color-accent-500: #1f3548;
+  --color-accent-600: #16273a;
+  --color-accent-700: #0d1a28;
+
+  /* Lacquer — Vietnamese sơn mài red. Sparing use: critical CTA
+     emphasis, errors, the "live" pulse, destructive confirmations. */
+  --color-lacquer-50: #f6e6e3;
+  --color-lacquer-200: #d99e92;
+  --color-lacquer-500: #8b2a1f;
+  --color-lacquer-700: #6a1f17;
+
+  /* Brass — warm metallic for warnings and decorative marks. */
+  --color-brass-300: #d9b777;
+  --color-brass-500: #a8843c;
+  --color-brass-700: #74591f;
+
+  /* Functional. */
+  --color-success-500: #2c5e3a;
+  --color-warning-500: var(--color-brass-500);
+  --color-danger-500: var(--color-lacquer-500);
+
+  /* Custom radii — square-ish corners feel more "printed". */
+  --radius-card: 6px;
+  --radius-pill: 999px;
+
+  /* Custom shadow scale — soft, low-opacity, warm-tinted. */
+  --shadow-paper:
+    none;
+  --shadow-paper-lg:
+    none;
+
+  /* Animation tokens. */
+  --ease-paper: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* -------------------------------------------------------------- */
+/* Base                                                            */
+/* -------------------------------------------------------------- */
+html,
+body {
+  background: var(--color-paper-50);
+  color: var(--color-ink-800);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  /* Softer paper field — keep some texture, but reduce visual dust so
+     data-heavy screens feel cleaner and more professional. */
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(46, 41, 32, 0.05) 1px, transparent 0),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.82) 0%, rgba(248, 244, 234, 0.9) 100%),
+    url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 22px 22px, auto, 200px 200px;
+}
+
+::selection {
+  background: var(--color-accent-500);
+  color: var(--color-paper-0);
+}
+
+/* -------------------------------------------------------------- */
+/* Typography helpers                                              */
+/* -------------------------------------------------------------- */
+.font-display {
+  font-family: var(--font-serif);
+  font-feature-settings: 'ss01', 'ss02', 'salt';
+  letter-spacing: -0.015em;
+}
+
+.font-display-soft {
+  font-family: var(--font-serif);
+  font-variation-settings: 'SOFT' 100, 'opsz' 60, 'wght' 500;
+  letter-spacing: -0.02em;
+}
+
+.overline {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline horizontal rule, like the rules separating sections in
+   a printed publication. */
+.rule {
+  border: 0;
+  height: 1px;
+  background:
+    linear-gradient(to right, transparent, var(--color-ink-200) 8%, var(--color-ink-200) 92%, transparent);
+}
+
+/* A decorative "drop cap" used on chat session titles. */
+.drop-cap::first-letter {
+  font-family: var(--font-serif);
+  font-variation-settings: 'SOFT' 100, 'opsz' 144, 'wght' 600;
+  float: left;
+  font-size: 3rem;
+  line-height: 0.92;
+  padding-right: 0.15em;
+  padding-top: 0.06em;
+  color: var(--color-accent-500);
+}
+
+/* -------------------------------------------------------------- */
+/* Form controls — restrained, paper-feel                          */
+/* -------------------------------------------------------------- */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-feature-settings: inherit;
+}
+
+@import './prose.css';
+
+/* -------------------------------------------------------------- */
+/* Animations                                                      */
+/* -------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 1rem;
+  z-index: 100;
+  background: var(--color-ink-900);
+  color: var(--color-paper-0);
+  padding: 0.5rem 0.875rem;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.skip-link:focus {
+  left: 1rem;
+}
+
+@import './animations.css';
+
+/* -------------------------------------------------------------- */
+/* Utilities                                                       */
+/* -------------------------------------------------------------- */
+.column-rule {
+  background-image: linear-gradient(to bottom, var(--color-ink-200), transparent 90%);
+}
+
+.paper-card {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98) 0%, rgba(252, 247, 238, 0.98) 100%);
+  border: 1px solid rgba(188, 174, 139, 0.55);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+.paper-card-elevated {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.99) 0%, rgba(252, 247, 238, 0.99) 100%);
+  border: 1px solid rgba(188, 174, 139, 0.55);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+/* Custom scrollbar — subtle, paper-friendly. */
+@supports (scrollbar-color: auto) {
+  * {
+    scrollbar-color: var(--color-ink-200) transparent;
+    scrollbar-width: thin;
+  }
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ink-200);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--color-ink-300); background-clip: padding-box; border: 2px solid transparent; }
+
+/* Focus ring — paperthin offset for keyboard nav. */
+:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

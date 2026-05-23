@@ -1,0 +1,53 @@
+/* =================================================================
+ * Animations & motion — keyframes plus utility classes that hook
+ * them up. Kept separate from globals.css so the theme/token file
+ * stays focused on design system primitives.
+ * ============================================================== */
+
+@keyframes paperFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.paper-fade-up { animation: paperFadeUp 0.45s var(--ease-paper) both; }
+.paper-stagger > * { animation: paperFadeUp 0.45s var(--ease-paper) both; }
+.paper-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.paper-stagger > *:nth-child(2) { animation-delay: 70ms; }
+.paper-stagger > *:nth-child(3) { animation-delay: 140ms; }
+.paper-stagger > *:nth-child(4) { animation-delay: 210ms; }
+.paper-stagger > *:nth-child(5) { animation-delay: 280ms; }
+.paper-stagger > *:nth-child(6) { animation-delay: 350ms; }
+.paper-stagger > *:nth-child(7) { animation-delay: 420ms; }
+.paper-stagger > *:nth-child(8) { animation-delay: 490ms; }
+
+@keyframes inkPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+.pulse-dot { animation: inkPulse 1.6s var(--ease-paper) infinite; }
+
+@keyframes caretBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.caret::after {
+  content: '▎';
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--color-accent-500);
+  animation: caretBlink 1s steps(2, end) infinite;
+}
+
+@keyframes shimmerSweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(31, 53, 72, 0.08),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.8s linear infinite;
+}

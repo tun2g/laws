@@ -1,0 +1,138 @@
+/* =================================================================
+ * Markdown rendering for legal advisories (.prose-legal) and inline
+ * chat assistant responses (.chat-prose). Lives next to globals.css
+ * and is imported from layout-level CSS.
+ * ============================================================== */
+
+.prose-legal {
+  font-family: var(--font-serif);
+  font-variation-settings: 'opsz' 16, 'SOFT' 30, 'wght' 400;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--color-ink-800);
+}
+.prose-legal h1,
+.prose-legal h2,
+.prose-legal h3 {
+  font-family: var(--font-serif);
+  font-variation-settings: 'opsz' 60, 'SOFT' 100, 'wght' 600;
+  letter-spacing: -0.02em;
+}
+.prose-legal h1 { font-size: 1.85rem; margin-bottom: 0.5rem; }
+.prose-legal h2 {
+  font-size: 1.3rem;
+  margin-top: 2rem;
+  border-bottom: 1px solid var(--color-ink-200);
+  padding-bottom: 0.35rem;
+}
+.prose-legal h3 { font-size: 1.08rem; margin-top: 1.4rem; }
+.prose-legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+.prose-legal th,
+.prose-legal td {
+  border: 1px solid var(--color-ink-200);
+  padding: 0.55rem 0.8rem;
+  vertical-align: top;
+}
+.prose-legal th {
+  background: var(--color-paper-100);
+  font-weight: 600;
+  text-align: left;
+}
+.prose-legal ul,
+.prose-legal ol { padding-left: 1.4rem; }
+.prose-legal li + li { margin-top: 0.3rem; }
+.prose-legal code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  background: var(--color-paper-100);
+  border-radius: 4px;
+  color: var(--color-ink-800);
+}
+.prose-legal a {
+  color: var(--color-accent-500);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.prose-legal blockquote {
+  border-left: 3px solid var(--color-accent-500);
+  padding-left: 1rem;
+  margin-left: 0;
+  font-style: italic;
+  color: var(--color-ink-600);
+}
+
+/* Inline chat assistant prose — denser, sans serif. */
+.chat-prose {
+  font-family: var(--font-sans);
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: var(--color-ink-800);
+}
+.chat-prose p + p { margin-top: 0.75rem; }
+.chat-prose h1,
+.chat-prose h2,
+.chat-prose h3 {
+  font-family: var(--font-serif);
+  font-variation-settings: 'opsz' 36, 'SOFT' 80, 'wght' 600;
+  letter-spacing: -0.015em;
+  color: var(--color-ink-900);
+}
+.chat-prose h1 { font-size: 1.25rem; margin: 1.1rem 0 0.4rem; }
+.chat-prose h2 { font-size: 1.1rem; margin: 1rem 0 0.35rem; }
+.chat-prose h3 { font-size: 1rem; margin: 0.8rem 0 0.3rem; }
+.chat-prose ul,
+.chat-prose ol { padding-left: 1.25rem; margin: 0.4rem 0; }
+.chat-prose li + li { margin-top: 0.2rem; }
+.chat-prose ul li { list-style-type: '— '; }
+.chat-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-paper-100);
+  border-radius: 3px;
+  padding: 0.08em 0.3em;
+}
+.chat-prose pre {
+  background: var(--color-ink-900);
+  color: var(--color-paper-50);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  font-size: 0.825rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.chat-prose pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+.chat-prose a {
+  color: var(--color-accent-500);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.chat-prose blockquote {
+  border-left: 2px solid var(--color-ink-300);
+  padding-left: 0.9rem;
+  margin: 0.6rem 0;
+  color: var(--color-ink-600);
+  font-style: italic;
+}
+.chat-prose table {
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 0.6rem 0;
+}
+.chat-prose th,
+.chat-prose td {
+  border: 1px solid var(--color-ink-200);
+  padding: 0.4rem 0.6rem;
+}
+.chat-prose th { background: var(--color-paper-100); font-weight: 600; }
