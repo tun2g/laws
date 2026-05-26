@@ -21,13 +21,23 @@ export class NewsFetcherService implements OnModuleInit {
   private readonly parser = new Parser<unknown, ExtendedRssItem>({
     timeout: 15_000,
     headers: {
-      // Several VN sites return 406 for "bot-shaped" user agents — mirror a
-      // recent desktop Chrome to keep the response negotiation simple.
+      // Several VN sites return 403/406 for "bot-shaped" clients — mirror a
+      // recent desktop Chrome and ship the full set of headers a real
+      // navigation would emit. Note: this won't bypass IP-range blocks; if
+      // 403 persists in production but not locally, the hosting egress IP
+      // is the likely cause.
       'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
         '(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
       Accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
       'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
     },
     customFields: {
       item: ['media:content', 'media:thumbnail', 'enclosure'],

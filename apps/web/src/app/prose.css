@@ -98,19 +98,63 @@
   border-radius: 3px;
   padding: 0.08em 0.3em;
 }
+/* Engraved plate — code blocks read like an inscribed contract clause.
+   Warm dark surface, brass capital at top-right, lacquer-to-brass left
+   edge tying back to the paper accent system. */
 .chat-prose pre {
-  background: var(--color-ink-900);
-  color: var(--color-paper-50);
-  border-radius: 6px;
-  padding: 0.85rem 1rem;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(217, 183, 119, 0.06), transparent 55%),
+    linear-gradient(180deg, #1e1a13 0%, #131008 100%);
+  color: #e8dcbe;
+  border-radius: 4px;
+  padding: 1.5rem 1.15rem 1rem 1.4rem;
   font-size: 0.825rem;
+  line-height: 1.6;
   overflow-x: auto;
-  margin: 0.75rem 0;
+  margin: 1rem 0;
+  border: 1px solid rgba(168, 132, 60, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+.chat-prose pre::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 2px;
+  background: linear-gradient(180deg,
+    rgba(217, 183, 119, 0.85) 0%,
+    rgba(139, 42, 31, 0.6) 100%);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.chat-prose pre::after {
+  content: '§';
+  position: absolute;
+  top: 0.35rem;
+  right: 0.7rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(217, 183, 119, 0.5);
+  font-variation-settings: 'opsz' 36, 'SOFT' 100, 'wght' 500;
+  pointer-events: none;
 }
 .chat-prose pre code {
   background: transparent;
   padding: 0;
   color: inherit;
+}
+.chat-prose pre::-webkit-scrollbar { height: 6px; }
+.chat-prose pre::-webkit-scrollbar-track { background: transparent; }
+.chat-prose pre::-webkit-scrollbar-thumb {
+  background: rgba(217, 183, 119, 0.32);
+  border-radius: 999px;
+  border: 0;
+}
+.chat-prose pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 183, 119, 0.5);
 }
 .chat-prose a {
   color: var(--color-accent-500);

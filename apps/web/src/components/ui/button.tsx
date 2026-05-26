@@ -12,25 +12,28 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    'bg-[var(--color-accent-500)] text-[var(--color-paper-0)] ' +
-    'hover:bg-[var(--color-accent-600)] active:bg-[var(--color-accent-700)] ' +
-    'disabled:bg-[var(--color-ink-300)] disabled:text-[var(--color-paper-50)] ' +
+    'bg-accent-500 text-paper-0 ' +
+    'hover:bg-accent-600 active:bg-accent-700 ' +
+    'disabled:bg-paper-200 disabled:text-ink-500 disabled:border disabled:border-paper-300 ' +
     'shadow-[var(--shadow-paper)]',
   secondary:
-    'bg-[var(--color-paper-0)] text-[var(--color-ink-800)] ' +
-    'border border-[var(--color-ink-200)] ' +
-    'hover:bg-[var(--color-paper-100)] hover:border-[var(--color-ink-300)] ' +
-    'active:bg-[var(--color-paper-200)]',
+    'bg-paper-0 text-ink-800 ' +
+    'border border-ink-200 ' +
+    'hover:bg-paper-100 hover:border-ink-300 ' +
+    'active:bg-paper-200 ' +
+    'disabled:text-ink-400',
   ghost:
-    'text-[var(--color-ink-700)] ' +
-    'hover:bg-[var(--color-paper-100)] active:bg-[var(--color-paper-200)]',
+    'text-ink-700 ' +
+    'hover:bg-paper-100 active:bg-paper-200 ' +
+    'disabled:text-ink-400',
   danger:
-    'bg-[var(--color-lacquer-500)] text-[var(--color-paper-0)] ' +
-    'hover:bg-[var(--color-lacquer-700)] disabled:opacity-50 ' +
+    'bg-lacquer-500 text-paper-0 ' +
+    'hover:bg-lacquer-700 disabled:opacity-50 ' +
     'shadow-[var(--shadow-paper)]',
   lacquer:
-    'bg-[var(--color-ink-900)] text-[var(--color-paper-0)] ' +
-    'hover:bg-[var(--color-ink-800)] shadow-[var(--shadow-paper)]',
+    'bg-ink-900 text-paper-0 ' +
+    'hover:bg-ink-800 shadow-[var(--shadow-paper)] ' +
+    'disabled:bg-paper-200 disabled:text-ink-500 disabled:border disabled:border-paper-300',
 };
 
 const sizeStyles: Record<Size, string> = {
@@ -50,7 +53,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={cn(
         'inline-flex items-center justify-center gap-2 font-medium tracking-[0.005em]',
         'transition-all duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent-500)]',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500',
         'disabled:cursor-not-allowed disabled:shadow-none',
         variantStyles[variant],
         sizeStyles[size],
