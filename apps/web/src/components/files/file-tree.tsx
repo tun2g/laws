@@ -4,11 +4,21 @@ import { useState } from 'react';
 import type { FileNode, FileNodeKind } from '@laws/shared';
 import { cn } from '@/lib/cn';
 import { InlineNameInput } from './inline-name-input';
+import {
+  TreeChevron as Chevron,
+  TreeFileIcon as FileIcon,
+  TreeFolderIcon as FolderIcon,
+  TreeKebabIcon as KebabIcon,
+} from './file-tree-icons';
+import { FileTreeContextMenu } from './file-tree-context-menu';
 
 export interface PendingCreate {
   parentPath: string;
   kind: FileNodeKind;
 }
+
+/** Custom drag MIME so internal row drags don't collide with native file uploads. */
+const DRAG_MIME = 'application/x-laws-path';
 
 interface Props {
   root: FileNode;
@@ -25,12 +35,41 @@ interface Props {
   onCancelRename: () => void;
   onCommitCreate: (parentPath: string, kind: FileNodeKind, name: string) => void;
   onCancelCreate: () => void;
+  /** Move `from` into `toParent` (empty string = root). */
+  onMoveTo: (from: string, toParent: string) => void;
 }
 
 export function FileTree(props: Props) {
   const filtered = filterTree(props.root, props.filter);
+  const [rootDragOver, setRootDragOver] = useState(false);
+
+  const acceptsInternalDrag = (e: React.DragEvent) =>
+    e.dataTransfer.types.includes(DRAG_MIME);
+
   return (
-    <ul className="text-[13px] text-[var(--color-ink-800)]">
+    <ul
+      className={cn(
+        'text-[13px] text-ink-800 rounded-[5px] transition-colors',
+        rootDragOver ? 'bg-accent-500/8 ring-1 ring-inset ring-accent-500/35' : '',
+      )}
+      onDragOver={(e) => {
+        if (!acceptsInternalDrag(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (!rootDragOver) setRootDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setRootDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (!acceptsInternalDrag(e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setRootDragOver(false);
+        const from = e.dataTransfer.getData(DRAG_MIME);
+        if (from) props.onMoveTo(from, '');
+      }}
+    >
       {props.pendingCreate?.parentPath === '' ? (
         <PendingCreateRow {...props} depth={0} />
       ) : null}
@@ -38,7 +77,7 @@ export function FileTree(props: Props) {
         <TreeRow key={child.path} node={child} depth={0} {...props} />
       ))}
       {(filtered.children ?? []).length === 0 && !props.pendingCreate ? (
-        <li className="px-2 py-3 text-[12.5px] italic text-[var(--color-ink-400)]">
+        <li className="px-2 py-3 text-[12.5px] italic text-ink-400">
           {props.filter
             ? 'Không có tệp nào khớp.'
             : 'Thư mục trống — tạo tệp/thư mục mới phía trên.'}
@@ -77,27 +116,58 @@ function TreeRow({
 }: { node: FileNode; depth: number } & Props) {
   const [open, setOpen] = useState(depth < 1 || Boolean(props.filter));
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const isSelected = props.selectedPath === node.path;
   const isEditing = props.editingPath === node.path;
   const isCreatingInside =
     node.kind === 'folder' && props.pendingCreate?.parentPath === node.path;
   const isOpen = open || isCreatingInside;
 
+  const acceptsInternalDrag = (e: React.DragEvent) =>
+    e.dataTransfer.types.includes(DRAG_MIME);
+
   return (
     <li>
       <div
+        draggable={!isEditing}
+        onDragStart={(e) => {
+          e.stopPropagation();
+          e.dataTransfer.setData(DRAG_MIME, node.path);
+          e.dataTransfer.effectAllowed = 'move';
+        }}
+        onDragOver={(e) => {
+          if (node.kind !== 'folder' || !acceptsInternalDrag(e)) return;
+          const from = e.dataTransfer.getData(DRAG_MIME);
+          if (from && (from === node.path || node.path.startsWith(`${from}/`))) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          if (!dragOver) setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setDragOver(false);
+        }}
+        onDrop={(e) => {
+          if (node.kind !== 'folder' || !acceptsInternalDrag(e)) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setDragOver(false);
+          const from = e.dataTransfer.getData(DRAG_MIME);
+          if (from && from !== node.path) props.onMoveTo(from, node.path);
+        }}
         className={cn(
           'group flex items-center gap-1 rounded-[5px] pl-2 pr-1 py-1 transition-colors',
           isEditing ? '' : 'cursor-pointer',
           isSelected && !isEditing
-            ? 'bg-[var(--color-accent-500)]/10 text-[var(--color-accent-700)]'
-            : !isEditing && 'hover:bg-[var(--color-paper-100)]',
+            ? 'bg-accent-500/10 text-accent-700'
+            : !isEditing && 'hover:bg-paper-100',
+          dragOver ? 'bg-accent-500/15 ring-1 ring-accent-500/45' : '',
         )}
         style={{ paddingLeft: `${8 + depth * 16}px` }}
         onClick={() => {
           if (isEditing) return;
+          props.onSelect(node);
           if (node.kind === 'folder') setOpen((v) => !v);
-          else props.onSelect(node);
         }}
       >
         {node.kind === 'folder' ? <Chevron open={isOpen} /> : <span className="w-3" aria-hidden />}
@@ -133,7 +203,7 @@ function TreeRow({
       </div>
 
       {menuOpen ? (
-        <ContextMenu
+        <FileTreeContextMenu
           node={node}
           onAction={(a) => {
             setMenuOpen(false);
@@ -160,56 +230,6 @@ function TreeRow({
         </ul>
       ) : null}
     </li>
-  );
-}
-
-function ContextMenu({
-  node,
-  onAction,
-  onClose,
-}: {
-  node: FileNode;
-  onAction: (a: 'rename' | 'delete' | 'download') => void;
-  onClose: () => void;
-}) {
-  return (
-    <>
-      <div className="fixed inset-0 z-20" onClick={onClose} />
-      <div className="absolute z-30 mt-0 ml-12 rounded-[6px] border border-[var(--color-paper-200)] bg-[var(--color-paper-0)] shadow-[var(--shadow-paper-lg)] py-1 min-w-[150px]">
-        <MenuItem onClick={() => onAction('rename')}>Đổi tên</MenuItem>
-        {node.kind === 'file' ? (
-          <MenuItem onClick={() => onAction('download')}>Tải xuống</MenuItem>
-        ) : null}
-        <MenuItem danger onClick={() => onAction('delete')}>
-          Xóa
-        </MenuItem>
-      </div>
-    </>
-  );
-}
-
-function MenuItem({
-  children,
-  onClick,
-  danger,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'block w-full px-3 py-1.5 text-left text-[12.5px] transition-colors',
-        danger
-          ? 'text-[var(--color-lacquer-500)] hover:bg-[var(--color-lacquer-50)]'
-          : 'text-[var(--color-ink-700)] hover:bg-[var(--color-paper-100)]',
-      )}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -240,46 +260,3 @@ function formatBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={cn('h-3 w-3 text-[var(--color-ink-400)] transition-transform', open ? 'rotate-90' : '')}
-      fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
-function FolderIcon({ open }: { open: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--color-brass-500)]" fill="currentColor" aria-hidden>
-      {open ? (
-        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H5l-2 9V7Z" />
-      ) : (
-        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
-      )}
-    </svg>
-  );
-}
-
-function FileIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--color-ink-400)]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-    </svg>
-  );
-}
-
-function KebabIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--color-ink-400)]" fill="currentColor" aria-hidden>
-      <circle cx="12" cy="5" r="1.5" />
-      <circle cx="12" cy="12" r="1.5" />
-      <circle cx="12" cy="19" r="1.5" />
-    </svg>
-  );
-}

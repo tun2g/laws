@@ -70,6 +70,54 @@ export function ToolbarButton({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Tree-row icon glyphs                                                */
+/* ------------------------------------------------------------------ */
+
+export function TreeChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-3 w-3 text-ink-400 transition-transform ${open ? 'rotate-90' : ''}`}
+      fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+export function TreeFolderIcon({ open }: { open: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-brass-500" fill="currentColor" aria-hidden>
+      {open ? (
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H5l-2 9V7Z" />
+      ) : (
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+      )}
+    </svg>
+  );
+}
+
+export function TreeFileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-ink-400" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+    </svg>
+  );
+}
+
+export function TreeKebabIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-ink-400" fill="currentColor" aria-hidden>
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  );
+}
+
 export function EmptyPreview() {
   return (
     <div className="flex flex-1 items-center justify-center px-6">

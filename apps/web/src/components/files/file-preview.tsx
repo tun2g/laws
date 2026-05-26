@@ -28,6 +28,7 @@ export function FilePreview({ projectId, node }: Props) {
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    if (node.kind === 'folder') return;
     let cancelled = false;
     setState({ kind: 'loading' });
     setEdited(null);
@@ -50,6 +51,33 @@ export function FilePreview({ projectId, node }: Props) {
       cancelled = true;
     };
   }, [projectId, node.path]);
+
+  if (node.kind === 'folder') {
+    const childCount = node.children?.length ?? 0;
+    return (
+      <div className="flex h-full flex-col">
+        <header className="border-b border-paper-200 px-5 py-3">
+          <Breadcrumbs path={node.path} />
+          <div className="mt-0.5 text-[11px] uppercase tracking-[0.04em] text-ink-500">
+            Thư mục · {childCount} mục
+          </div>
+        </header>
+        <div className="flex flex-1 items-center justify-center px-5 py-10 text-center">
+          <div>
+            <p
+              className="font-serif text-[18px] tracking-[-0.01em] text-ink-800"
+              style={{ fontVariationSettings: "'SOFT' 100, 'opsz' 28, 'wght' 480" }}
+            >
+              {node.name}
+            </p>
+            <p className="mt-1.5 text-[12.5px] text-ink-500">
+              Kéo tệp vào thư mục này, hoặc dùng nút <span className="font-medium">+ Tệp</span> để tạo mới bên trong.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const dirty = edited !== null && state.kind === 'text' && edited !== state.content;
 

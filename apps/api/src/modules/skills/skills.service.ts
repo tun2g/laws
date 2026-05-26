@@ -14,8 +14,10 @@ import { SKILLS, type SkillId } from '@laws/skill-prompts';
 import { SkillRun, SkillRunKind } from './entities/skill-run.entity';
 import { Project } from '../projects/entities/project.entity';
 import { CodexCliRunService } from '../codex-cli/codex-cli-run.service';
+import { CodexCliPathsService } from '../codex-cli/codex-cli-paths.service';
 import { UsersService } from '../users/users.service';
 import { StartSkillDto } from './dto/start-skill.dto';
+import { stageSkillIntoWorkspace } from './helpers/stage-skill';
 
 @Injectable()
 export class SkillsService {
@@ -26,6 +28,7 @@ export class SkillsService {
     private readonly runs: Repository<SkillRun>,
     @InjectRepository(Project) private readonly projects: Repository<Project>,
     private readonly codex: CodexCliRunService,
+    private readonly paths: CodexCliPathsService,
     private readonly users: UsersService,
   ) {}
 
@@ -106,9 +109,14 @@ export class SkillsService {
         const skill = (run.kind === 'dual-lang' ? 'dual-lang' : run.kind) as SkillId;
         const skillDef = SKILLS[skill];
 
+        // Materialize the skill folder (SKILL.md + scripts/ + references/)
+        // inside the project workspace so Codex can `python3 .skills/<id>/scripts/...`
+        const workspace = await this.paths.ensureProjectWorkspace(ownerId, run.projectId);
+        await stageSkillIntoWorkspace(workspace, skillDef);
+
         await new Promise<void>((resolve) => {
           const sub = this.codex
-            .runSkill(ownerId, skillDef.systemPrompt, run.input)
+            .runSkill(ownerId, skillDef.systemPrompt, run.input, run.projectId)
             .subscribe({
               next: async (part) => {
                 if (cancelled) return;

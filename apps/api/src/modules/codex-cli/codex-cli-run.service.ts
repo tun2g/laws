@@ -180,13 +180,18 @@ export class CodexCliRunService {
   }
 
   /** Legacy one-shot skill runner; flattens Codex JSONL to plain token deltas. */
-  runSkill(userId: string, systemPrompt: string, userInput: string): Observable<SkillStreamPart> {
+  runSkill(
+    userId: string,
+    systemPrompt: string,
+    userInput: string,
+    projectId?: string,
+  ): Observable<SkillStreamPart> {
     const prompt = `${systemPrompt}\n\n---\n\nUser request:\n${userInput}`;
     return new Observable<SkillStreamPart>((subscriber) => {
       let accumulated = '';
       let tokenUsage: number | null = null;
 
-      const inner = this.run(userId, prompt).subscribe({
+      const inner = this.run(userId, prompt, undefined, projectId).subscribe({
         next: (evt) => {
           if (evt.type === 'codex') {
             const delta = extractAgentTextDelta(evt.event, accumulated);

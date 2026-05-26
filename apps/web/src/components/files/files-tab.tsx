@@ -79,6 +79,24 @@ export function FilesTab({ projectId }: { projectId: string }) {
     }
   };
 
+  const moveToFolder = async (from: string, toParent: string) => {
+    const name = from.includes('/') ? from.slice(from.lastIndexOf('/') + 1) : from;
+    const to = toParent ? `${toParent}/${name}` : name;
+    if (from === to) return;
+    if (toParent === from || toParent.startsWith(`${from}/`)) {
+      toast.error('Không thể di chuyển vào chính nó');
+      return;
+    }
+    try {
+      await moveFileNode(projectId, from, to);
+      if (selected?.path === from) setSelected({ ...selected, path: to });
+      toast.success('Đã di chuyển');
+      invalidate();
+    } catch (err) {
+      toast.error(readableError(err, 'Di chuyển thất bại'));
+    }
+  };
+
   const onContextAction = (node: FileNode, action: 'rename' | 'delete' | 'download') => {
     if (action === 'rename') setEditingPath(node.path);
     else if (action === 'delete') setPendingDelete(node);
@@ -130,9 +148,10 @@ export function FilesTab({ projectId }: { projectId: string }) {
   };
 
   const onDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
     setDropping(false);
     const files = Array.from(e.dataTransfer?.files ?? []);
+    if (files.length === 0) return; // internal row drag — handled inside tree
+    e.preventDefault();
     for (const f of files) await uploadOne(f);
   };
 
@@ -182,6 +201,8 @@ export function FilesTab({ projectId }: { projectId: string }) {
             dropping ? 'bg-[var(--color-accent-500)]/8 ring-2 ring-inset ring-[var(--color-accent-500)]/40' : '',
           )}
           onDragOver={(e) => {
+            // Only show the upload overlay for native file drags, not row moves.
+            if (!e.dataTransfer.types.includes('Files')) return;
             e.preventDefault();
             if (!dropping) setDropping(true);
           }}
@@ -209,6 +230,7 @@ export function FilesTab({ projectId }: { projectId: string }) {
               onCancelRename={() => setEditingPath(null)}
               onCommitCreate={commitCreate}
               onCancelCreate={() => setPendingCreate(null)}
+              onMoveTo={moveToFolder}
             />
           ) : null}
           {dropping ? (

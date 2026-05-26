@@ -32,6 +32,18 @@ RUN pnpm build
 FROM node:22-alpine AS api-runner
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+
+# Python + python-docx for the vn-legal-* skills Codex runs in-container.
+# lxml (a transitive dep) needs libxml2/libxslt; build deps are wiped after
+# pip install to keep the final image slim.
+RUN apk add --no-cache python3 py3-pip libxml2 libxslt \
+ && apk add --no-cache --virtual .build-deps \
+      build-base python3-dev libxml2-dev libxslt-dev \
+ && python3 -m venv /opt/skills-venv \
+ && /opt/skills-venv/bin/pip install --no-cache-dir python-docx==1.1.2 \
+ && apk del .build-deps
+ENV PATH="/opt/skills-venv/bin:$PATH"
+
 RUN corepack enable
 RUN npm install -g @openai/codex@0.133.0
 WORKDIR /app
